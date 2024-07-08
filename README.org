@@ -1,0 +1,50 @@
+* Gameboy Advance with Zig (From Scratch)
+
+This repository is my attempt at making a Gameboy Advance program
+from scratch with Zig. I originally used C for a GBA dev homework
+assignment in a class (and would probably still use C for 
+serious development), but getting Zig to work sounded fun so
+I figured I'd give it a shot. I seem to have an inclination
+to make turn things that don't work into things that do,
+especially if it's not quite standard.
+
+If you want to run this, I use mGBA personally. Other emulators
+might work but mGBA definitely will. If you want to run this with
+~zig build run~, you'll need to change ~build.zig~.
+
+If anyone is knowledgeable in GBA dev and/or Zig and has tips,
+feel free to open an issue or look on [[https://aerasto.xyz][my website]] for other contact details.
+
+** Issues Encountered
+
+These are all the issues I've encountered, some weird and some
+probably trivial to anyone with more knowledge than me:
+- ~const~ variables are stored in ROM and ~var~ variables are
+  stored on the stack. DMA does not support a fixed source address
+  if the source address points to ROM.
+- Sometimes Zig will optimize out ~var~ variables and not store them
+  on the stack. This can cause issues with DMA since DMA can end up reading
+  from a source address that points to 0.
+  - The optimization seems to only happen on Release optimizations and
+    not on Debug, though I swear it also happened on Debug at one point.
+  - I had this issue when I was using a simpler loop and one color
+    variable, but when I moved to two color variables and the loop
+    that bounces the square around, this issue magically disappeared.
+- The ~build.zig~ file I've made enables thumb mode by default.
+  Adding in ~.thumb~ in zrt0 (the starting assembly bootstrapper)
+  will *disable* thumb mode, which can cause weird inline assembly errors.
+- Linker scripts. They're still super arcane.
+
+** Thanks To
+
+There are some great resources out there. I can't remember them all but
+I'll list the ones I remember here:
+- The GBA Dev Discord community
+- https://lokathor.github.io/gba-from-scratch/ (I have a Rust implementation
+  that I'll redo soon as well)
+- DevkitARM, especially https://github.com/devkitPro/devkitarm-crtls and
+  the linker scripts and crt0s contained within
+- https://github.com/wendigojaeger/ZigGBA
+- https://github.com/darkskiez/ZigGBAHelloWorld/
+- https://github.com/AntonioND/gba-bootstrap (the source of ~c_boot.ld~)
+- http://bear.ces.cwru.edu/eecs_382/ARM7-TDMI-manual-pt3.pdf
