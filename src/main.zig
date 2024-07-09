@@ -1,3 +1,5 @@
+const DMA = @import("dma.zig");
+
 const MODE_3 = 3;
 const BG2 = 1 << 10;
 
@@ -15,29 +17,10 @@ const Color = enum(u16) {
     BLACK = 0,
 };
 
-const DmaCtl = packed struct {
-    count: u16 = 0,
-    big_blank: u5 = 0,
-    dst_ctl: u2 = 0,
-    src_ctl: u2 = 2,
-    repeat: u1 = 0,
-    chunk_size: u1 = 0,
-    small_blank: u1 = 0,
-    timing_mode: u2 = 0,
-    irq: u1 = 0,
-    enable: u1 = 1,
-};
-
-const DmaController = extern struct {
-    src: *volatile anyopaque,
-    dst: *volatile anyopaque,
-    cnt: DmaCtl,
-};
-
 export fn main() noreturn {
     DISPCNT.* = MODE_3 | BG2;
 
-    const dma: [*]volatile DmaController = @ptrFromInt(0x0400_00B0);
+    const dma = DMA.DmaController.new();
 
     // So now that there's two color variables
     // and they're used in this kind of demo,
