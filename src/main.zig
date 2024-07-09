@@ -53,13 +53,13 @@ export fn main() noreturn {
         for (0..size) |i| {
             dma[3].src = &black;
             dma[3].dst = (VID.VIDEO_BUFFER + (240 * (i + @as(usize, @intCast(oldrow)))) + @as(usize, @intCast(oldcol)));
-            dma[3].cnt = .{ .count = size };
+            dma[3].cnt = .{ .count = size, .src_ctl = .Fixed, .enable = true };
         }
 
         for (0..size) |i| {
             dma[3].src = &color;
             dma[3].dst = (VID.VIDEO_BUFFER + (240 * (i + @as(usize, @intCast(row)))) + @as(usize, @intCast(col)));
-            dma[3].cnt = .{ .count = size };
+            dma[3].cnt = .{ .count = size, .src_ctl = .Fixed, .enable = true };
         }
     }
 
