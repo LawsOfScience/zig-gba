@@ -1,24 +1,9 @@
 const DMA = @import("dma.zig");
-
-const MODE_3 = 3;
-const BG2 = 1 << 10;
-
-const DISPCNT: *volatile u32 = @ptrFromInt(0x0400_0000);
-const VID: [*]volatile u16 = @ptrFromInt(0x0600_0000);
-const SCANLINE_CNT: *volatile u16 = @ptrFromInt(0x0400_0006);
-
-const SCREEN_HEIGHT: comptime_int = 160;
-const SCREEN_WIDTH: comptime_int = 240;
-
-const Color = enum(u16) {
-    RED = 31,
-    GREEN = 31 << 5,
-    BLUE = 31 << 10,
-    BLACK = 0,
-};
+const VID = @import("vid.zig");
 
 export fn main() noreturn {
-    DISPCNT.* = MODE_3 | BG2;
+    const display = VID.Display.new();
+    display.*.control = .{ .mode = .Mode3, .background = .Bg2 };
 
     const dma = DMA.DmaController.new();
 
@@ -26,8 +11,8 @@ export fn main() noreturn {
     // and they're used in this kind of demo,
     // Zig won't optimize them out on Release
     // optimization? Weird
-    var color = Color.RED;
-    var black = Color.BLACK;
+    var color = VID.Color.RED;
+    var black = VID.Color.BLACK;
     // const thing: *volatile u16 = @ptrFromInt(0x0300_7EFC);
     // thing.* = 31;
 
@@ -50,31 +35,30 @@ export fn main() noreturn {
         if (row < 0) {
             row = 0;
             rowchange = -rowchange;
-        } else if (row > (SCREEN_HEIGHT - size)) {
-            row = SCREEN_HEIGHT - size;
+        } else if (row > (VID.SCREEN_HEIGHT - size)) {
+            row = VID.SCREEN_HEIGHT - size;
             rowchange = -rowchange;
         }
 
         if (col < 0) {
             col = 0;
             colchange = -colchange;
-        } else if (col > (SCREEN_WIDTH - size)) {
-            col = SCREEN_WIDTH - size;
+        } else if (col > (VID.SCREEN_WIDTH - size)) {
+            col = VID.SCREEN_WIDTH - size;
             colchange = -colchange;
         }
 
-        while (SCANLINE_CNT.* > 160) {}
-        while (SCANLINE_CNT.* < 160) {}
+        VID.waitForVBlank();
 
         for (0..size) |i| {
             dma[3].src = &black;
-            dma[3].dst = (VID + (240 * (i + @as(usize, @intCast(oldrow)))) + @as(usize, @intCast(oldcol)));
+            dma[3].dst = (VID.VIDEO_BUFFER + (240 * (i + @as(usize, @intCast(oldrow)))) + @as(usize, @intCast(oldcol)));
             dma[3].cnt = .{ .count = size };
         }
 
         for (0..size) |i| {
             dma[3].src = &color;
-            dma[3].dst = (VID + (240 * (i + @as(usize, @intCast(row)))) + @as(usize, @intCast(col)));
+            dma[3].dst = (VID.VIDEO_BUFFER + (240 * (i + @as(usize, @intCast(row)))) + @as(usize, @intCast(col)));
             dma[3].cnt = .{ .count = size };
         }
     }
