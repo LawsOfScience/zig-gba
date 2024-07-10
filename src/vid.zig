@@ -23,13 +23,13 @@ pub const Display = extern struct {
 
 pub const DisplayControl = packed struct {
     mode: DisplayMode = .Mode0,
-    is_gbc: u1 = 0,
+    is_cartrige: bool = false,
     page_select: u1 = 0,
-    oam_hblank_access: u1 = 0,
+    oam_hblank_access: bool = false,
     object_mapping_mode: u1 = 0,
-    force_blank: u1 = 0,
+    force_blank: bool = false,
     background: Background = .Bg0,
-    window_control: u3 = 0,
+    window_control: WindowControl = .Window0,
 };
 
 pub const DisplayMode = enum(u3) {
@@ -47,6 +47,12 @@ pub const Background = enum(u5) {
     Bg2 = 1 << 2,
     Bg3 = 1 << 3,
     Obj = 1 << 4,
+};
+
+pub const WindowControl = enum(u3) {
+    Window0 = 1 << 0,
+    Window1 = 1 << 1,
+    ObjectWindow = 1 << 2,
 };
 
 pub fn waitForVBlank() void {
