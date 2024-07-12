@@ -29,7 +29,7 @@ pub const DisplayControl = packed struct {
     object_mapping_mode: u1 = 0,
     force_blank: bool = false,
     background: Background = .Bg0,
-    window_control: WindowControl = .Window0,
+    window_control: WindowControl = .None,
 };
 
 pub const DisplayMode = enum(u3) {
@@ -50,6 +50,7 @@ pub const Background = enum(u5) {
 };
 
 pub const WindowControl = enum(u3) {
+    None = 0b000,
     Window0 = 1 << 0,
     Window1 = 1 << 1,
     ObjectWindow = 1 << 2,
